@@ -1,6 +1,8 @@
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from pydantic import BaseModel
@@ -20,6 +22,14 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Подключаем папку со статикой (ваши стили, скрипты и картинки внутри app/static)
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
+
+# Роут для главной страницы — отдает ваш index.html
+@app.get("/")
+async def read_index():
+    return FileResponse("app/static/index.html")
 
 @app.on_event("startup")
 async def startup():
@@ -69,7 +79,6 @@ async def register(user_data: UserRegister, db: AsyncSession = Depends(get_db)):
 
 @app.post("/api/v1/auth/login", response_model=Token)
 async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = Depends(get_db)):
-    # OAuth2PasswordRequestForm передает логин через поле form_data.username
     result = await db.execute(select(UserDB).where(UserDB.login == form_data.username.lower()))
     user = result.scalars().first()
     if not user or not verify_password(form_data.password, user.hashed_password):

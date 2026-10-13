@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CryptoWatch</title>
+<style>
+:root,:root[data-theme="dark"]{--bg:#0b0e14;--panel:#141925;--line:#222a3a;--text:#e8ecf4;--mute:#8793a8;--up:#2ecc8f;--down:#ff5c6c;--acc:#6c8cff}
+:root[data-theme="light"]{--bg:#f3f5f9;--panel:#fff;--line:#e2e6ee;--text:#151a26;--mute:#6a7488;--up:#12a36b;--down:#e0394a;--acc:#4663e8}
+:root[data-theme="neon"]{--bg:#0a0620;--panel:#150c36;--line:#2d1d63;--text:#f2eaff;--mute:#9f8fd1;--up:#00f5c8;--down:#ff3d9a;--acc:#b44cff}
+:root[data-theme="ocean"]{--bg:#06202b;--panel:#0b3140;--line:#14506a;--text:#e6f7fb;--mute:#86b5c4;--up:#4de3a8;--down:#ff7a6b;--acc:#2fc4e8}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(900px 400px at 80% -10%,color-mix(in srgb,var(--acc) 18%,transparent),transparent),var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;min-height:100vh}
+header{display:flex;justify-content:space-between;align-items:center;max-width:1100px;margin:0 auto;padding:20px 16px;gap:12px;flex-wrap:wrap}
+.logo{font-weight:700;font-size:20px;cursor:pointer}.logo span{color:var(--acc)}
+.right{display:flex;align-items:center;gap:14px;flex-wrap:wrap}.live{font-size:12px;color:var(--mute)}
+.themes{display:flex;gap:8px}.th{width:22px;height:22px;border-radius:50%;border:2px solid var(--line);cursor:pointer;padding:0}.th.on{border-color:var(--text)}
+main{max-width:1100px;margin:0 auto;padding:0 16px 32px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:12px;margin-bottom:16px}
+.bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+input,select{background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font:inherit;font-size:14px}
+#q{flex:1;min-width:180px}
+.tabs{display:flex;gap:6px;padding:4px 0 10px;flex-wrap:wrap;align-items:center}
+.tab{padding:6px 14px;border-radius:999px;border:1px solid var(--line);background:none;color:var(--mute);font:inherit;font-size:13px;cursor:pointer}
+.tab.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+.row{display:grid;grid-template-columns:32px 32px minmax(120px,1.6fr) 1fr 80px 1fr 100px;gap:8px;align-items:center;padding:10px 6px;border-radius:12px;cursor:pointer}
+.row:not(.hd):hover{background:color-mix(in srgb,var(--acc) 9%,transparent)}
+.hd{color:var(--mute);font-size:12px;cursor:default;border-bottom:1px solid var(--line);border-radius:0}
+.row .p,.row .cp,.row .ch{text-align:right}
+@media(max-width:640px){.row{grid-template-columns:28px minmax(100px,1.6fr) 1fr 72px}.rk,.cp,.sp,.hd .x{display:none}}
+.st{background:none;border:0;color:var(--mute);font-size:18px;cursor:pointer;padding:0}.st.on{color:#f5b301}
+.who{display:flex;align-items:center;gap:10px}.who b{display:block}.who small{color:var(--mute)}
+.ic{width:32px;height:32px;flex:none;position:relative}.ic svg,.ic img{width:100%;height:100%;display:block;border-radius:50%}
+.ic .lt{position:absolute;inset:0;border-radius:50%;background:var(--acc);color:#fff;display:grid;place-items:center;font-weight:700;font-size:12px}
+.ic img{position:absolute;inset:0;background:var(--panel)}
+.up{color:var(--up)}.down{color:var(--down)}.ch{font-size:13px}.rk{color:var(--mute)}
+.sp{width:100px;height:28px}
+.msg{color:var(--mute);padding:20px;text-align:center}
+.back{background:none;border:0;color:var(--acc);font:inherit;cursor:pointer;padding:4px 0 12px}
+.head{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:8px;padding:4px 8px}
+.hd2{display:flex;align-items:center;gap:10px;color:var(--mute)}.big{font-size:32px;font-weight:700;color:var(--text)}
+#chart{width:100%;height:280px;display:block}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:8px 0}
+@media(max-width:560px){.stats{grid-template-columns:repeat(2,1fr)}}
+.stat{border:1px solid var(--line);border-radius:12px;padding:10px}.stat small{display:block;color:var(--mute)}
+.about{color:var(--mute);line-height:1.55;font-size:14px;margin:6px 0 12px}
+.links{display:flex;gap:8px;flex-wrap:wrap}.links a{padding:8px 14px;border:1px solid var(--line);border-radius:999px;color:var(--acc);text-decoration:none;font-size:14px}
+.nav{display:flex;gap:6px}.nav a{padding:8px 14px;border-radius:999px;color:var(--mute);text-decoration:none;font-size:14px;border:1px solid transparent}.nav a.on{color:var(--text);border-color:var(--line);background:var(--panel)}
+.form{display:grid;grid-template-columns:1.3fr 1fr 1.3fr auto;gap:8px}@media(max-width:640px){.form{grid-template-columns:1fr 1fr}.form select,.form button{grid-column:1/-1}}
+.btn{background:var(--acc);color:#fff;border:0;border-radius:10px;padding:10px 18px;font:inherit;font-weight:600;cursor:pointer}
+.hint{color:var(--mute);font-size:12px;margin-top:6px;min-height:16px}
+.sum{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;padding:4px 8px 12px}.sum small{color:var(--mute);display:block}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.card{border:1px solid var(--line);border-radius:12px;padding:12px}.card small{color:var(--mute);display:block}.card b{font-size:20px}
+.alloc{display:flex;height:12px;border-radius:6px;overflow:hidden;margin:14px 0 8px;background:var(--line)}
+.leg{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--mute);margin-bottom:10px}.leg i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px}
+.prow{display:grid;grid-template-columns:minmax(110px,1.5fr) 1fr 1fr 1fr 1fr 56px 1.1fr 28px;gap:8px;align-items:center;padding:10px 6px;border-top:1px solid var(--line);font-size:14px}
+.prow.hd{border-top:0;border-bottom:1px solid var(--line);cursor:default}.prow>*:not(.who){text-align:right}
+.x2{background:none;border:0;color:var(--mute);cursor:pointer;font-size:16px}.x2:hover{color:var(--down)}
+@media(max-width:700px){.prow{grid-template-columns:minmax(90px,1.5fr) 1fr 1fr 28px}.prow .m{display:none}}
+.fbig{font-size:34px;font-weight:700}.fsub{color:var(--mute);font-size:13px;margin-top:4px}
+.ph{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px}.ph>b{font-size:15px}
+.lsbar{display:flex;height:22px;border-radius:11px;overflow:hidden;margin:12px 0 6px;font-size:12px;font-weight:600;color:#fff}
+.lsbar div{display:grid;place-items:center;min-width:34px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.fgbar{height:14px;border-radius:7px;background:linear-gradient(90deg,#ff4d4d,#ff9f43,#f5c518,#8bd450,#2ecc8f);position:relative;margin:16px 0 8px}
+.fgbar i{position:absolute;top:-5px;width:6px;height:24px;border-radius:3px;background:var(--text);border:2px solid var(--panel);transform:translateX(-50%)}
+.fgs{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.fgs .card{flex:1;min-width:100px}
+.mini{width:100%;height:120px;display:block;margin-top:8px}
+.frow{display:grid;grid-template-columns:minmax(110px,1.4fr) 1fr 90px 90px 1fr;gap:8px;align-items:center;padding:10px 6px;border-top:1px solid var(--line);font-size:14px;cursor:pointer}
+.frow:not(.hd):hover{background:color-mix(in srgb,var(--acc) 9%,transparent)}.frow.hd{cursor:default;border-top:0;border-bottom:1px solid var(--line);color:var(--mute);font-size:12px}
+.frow>*:not(.who){text-align:right}@media(max-width:640px){.frow{grid-template-columns:minmax(90px,1.4fr) 1fr 74px 80px}.frow .m{display:none}}
+.al{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:12px 6px;border-top:1px solid var(--line);font-size:14px}
+.al.done{opacity:.75}.al small{color:var(--mute);display:block}
+.aform{display:grid;grid-template-columns:1.4fr 80px 1.2fr;gap:8px}.aform .full{grid-column:1/-1}
+@media(max-width:560px){.aform{grid-template-columns:1fr 80px}.aform input{grid-column:1/-1}}
+.chk{display:flex;gap:16px;flex-wrap:wrap;font-size:14px;color:var(--mute)}.chk label{cursor:pointer}
+.sgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}@media(max-width:560px){.sgrid{grid-template-columns:1fr}}
+.btn2{background:none;border:1px solid var(--line);color:var(--text);border-radius:10px;padding:9px 14px;font:inherit;font-size:13px;cursor:pointer}
+.help{color:var(--mute);font-size:12px;line-height:1.5;margin:6px 0}.ok{color:var(--up)}.bad{color:var(--down)}
+#accl{max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.auth{display:flex;flex-direction:column;gap:8px}
+.prof{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.avatar{width:56px;height:56px;border-radius:50%;background:var(--acc);color:#fff;display:grid;place-items:center;font-size:24px;font-weight:700;flex:none}
+a.card{color:inherit;text-decoration:none;display:block}a.card:hover{border-color:var(--acc)}
+.sec{margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
+.sec>b{display:block;margin-bottom:8px}
+.danger{color:var(--down);border-color:color-mix(in srgb,var(--down) 50%,var(--line))}
+
+/* ===== V7: UI ===== */
+:root{color-scheme:dark}:root[data-theme="light"]{color-scheme:light}
+body,.panel{transition:background-color .35s,color .35s,border-color .35s}
+.tt,.tt *{transition:background-color .4s,color .4s,border-color .4s,fill .4s,stroke .4s,box-shadow .4s!important}
+.coin,.row,.frow,.tab,.btn,.btn2,.card,.stat,.nav a,.th{transition:background-color .2s,border-color .2s,color .2s,transform .15s,box-shadow .2s}
+.btn:active,.btn2:active,.tab:active{transform:scale(.96)}
+.th:hover{transform:scale(1.18)}
+.card:hover,.stat:hover{border-color:color-mix(in srgb,var(--acc) 40%,var(--line))}
+:root[data-theme="light"] .panel{box-shadow:0 1px 2px rgba(20,30,60,.05),0 8px 24px rgba(20,30,60,.06)}
+:root[data-theme="neon"] .panel{box-shadow:0 0 0 1px color-mix(in srgb,var(--acc) 22%,transparent),0 0 28px color-mix(in srgb,var(--acc) 14%,transparent)}
+:root[data-theme="neon"] .logo span{text-shadow:0 0 14px var(--acc)}
+:root[data-theme="neon"] .tab.on,:root[data-theme="neon"] .btn{box-shadow:0 0 16px color-mix(in srgb,var(--acc) 70%,transparent)}
+:root[data-theme="neon"] .big{text-shadow:0 0 18px color-mix(in srgb,var(--acc) 45%,transparent)}
+:root[data-theme="neon"] #cpl{filter:drop-shadow(0 0 6px currentColor)}
+#cpl{transition:color .5s}#chart stop{transition:stop-color .5s}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+#app>*{animation:fadeUp .35s ease both}
+#app>*:nth-child(2){animation-delay:.05s}#app>*:nth-child(3){animation-delay:.1s}#app>*:nth-child(4){animation-delay:.15s}
+.in>*{animation:fadeIn .4s ease both}
+.row .p{justify-self:end;border-radius:6px;padding:0 4px}
+@keyframes flashUp{0%{background:color-mix(in srgb,var(--up) 38%,transparent)}100%{background:transparent}}
+@keyframes flashDown{0%{background:color-mix(in srgb,var(--down) 38%,transparent)}100%{background:transparent}}
+.p.fu{animation:flashUp 1.2s ease-out}.p.fd{animation:flashDown 1.2s ease-out}
+/* skeleton */
+.sk{display:block;border-radius:8px;background:linear-gradient(90deg,color-mix(in srgb,var(--text) 9%,var(--panel)) 25%,color-mix(in srgb,var(--text) 17%,var(--panel)) 50%,color-mix(in srgb,var(--text) 9%,var(--panel)) 75%);background-size:200% 100%;animation:shine 1.4s ease-in-out infinite}
+@keyframes shine{from{background-position:200% 0}to{background-position:-200% 0}}
+.sk-row{pointer-events:none}
+.skb{fill:color-mix(in srgb,var(--text) 14%,var(--panel));animation:pulse 1.2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:.35}50%{opacity:.9}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}}
+</style>
+</head>
+<body>
+<header><div class="logo" onclick="location.hash=''">Crypto<span>Watch</span></div><nav class="nav"><a href="#">Рынок</a><a href="#/portfolio">💼 Портфель</a><a href="#/futures">⚡ Futures</a><a href="#/alerts">🔔 Алерты</a><a href="#/account" id="accl">👤 Войти</a></nav><div class="right"><div class="themes" id="themes"></div><div class="live" id="status">Загрузка…</div></div></header>
+<main id="app"></main>
+<script>
+const CG='https://api.coingecko.com/api/v3', BN='https://data-api.binance.vision/api/v3';
+const $=id=>document.getElementById(id);
+const esc=t=>{const d=document.createElement('div');d.textContent=t??'';return d.innerHTML};
+const fmt=v=>v==null?'–':'$'+(v>=100?v.toLocaleString('en-US',{maximumFractionDigits:0}):v>=1?v.toFixed(2):v>=0.01?v.toFixed(4):v.toFixed(8));
+const big=v=>v==null?'–':v>=1e12?'$'+(v/1e12).toFixed(2)+' трлн':v>=1e9?'$'+(v/1e9).toFixed(1)+' млрд':'$'+(v/1e6).toFixed(0)+' млн';
+const pc=v=>v==null?'–':(v>=0?'▲ ':'▼ ')+Math.abs(v).toFixed(2)+'%';
+const dt=s=>s?new Date(s).toLocaleDateString('ru-RU'):'';
+
+let me=null;
+let acct=null;
+
+async function j(url,t=10000){const c=new AbortController(),m=setTimeout(()=>c.abort(),t);try{const r=await fetch(url,{signal:c.signal});if(!r.ok)throw new Error(r.status);return await r.json()}finally{clearTimeout(m)}}
+
+// ---------- логотипы ----------
+const G={BTC:'<path d="M12 8.5v15M12 9h5.3a3.2 3.2 0 010 6.4H12M12 15.4h6.2a3.3 3.3 0 010 6.6H12M14.5 6.5v2.5M17.5 6.5v2.5M14.5 22v2.6M17.5 22v2.6" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>',
+ETH:'<path d="M16 5l7 11-7 4-7-4z" fill="#fff"/><path d="M16 22l7-4-7 9-7-9z" fill="#fff" opacity=".7"/>',
+BNB:'<g fill="#fff"><path d="M16 12.4l3.6 3.6-3.6 3.6-3.6-3.6z"/><path d="M16 6l3 3-3 3-3-3z"/><path d="M16 20l3 3-3 3-3-3z"/><path d="M6 16l3-3 3 3-3 3z"/><path d="M20 16l3-3 3 3-3 3z"/></g>',
+SOL:'<g fill="#fff"><path d="M10 8h15l-3 4H7z"/><path d="M7 14h15l3 4H10z"/><path d="M10 20h15l-3 4H7z"/></g>',
+XRP:'<path d="M9 9l7 7 7-7M9 23l7-7 7 7" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>'};
+const COL={BTC:'#f7931a',ETH:'#627eea',BNB:'#d4a017',SOL:'#9945ff',XRP:'#2f9bd8'};
+function logo(c){const s=c.symbol.toUpperCase();
+ if(G[s])return `<svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="${COL[s]}"/>${G[s]}</svg>`;
+ return `<span class="lt">${esc(s[0])}</span>${c.image?`<img src="${esc(c.image)}" alt="" loading="lazy" onerror="this.remove()">`:''}`}
+
+// ---------- темы ----------
+const THEMES=[{k:'dark',l:'Тёмная',c:'#0b0e14'},{k:'light',l:'Светлая',c:'#f3f5f9'},{k:'neon',l:'Неон',c:'#b44cff'},{k:'ocean',l:'Океан',c:'#2fc4e8'}];
+function setTheme(k,save=true){if(save){document.documentElement.classList.add('tt');setTimeout(()=>document.documentElement.classList.remove('tt'),500)}document.documentElement.dataset.theme=k;if(save)localStorage.setItem('theme',k);
+ $('themes').innerHTML=THEMES.map(t=>`<button class="th ${t.k===k?'on':''}" title="${t.l}" aria-label="${t.l}" style="background:${t.c}" onclick="setTheme('${t.k}')"></button>`).join('')}
+setTheme(localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: light)').matches?'light':'dark'),false);
+
+// ---------- данные рынка ----------
+let coins=[],favs=new Set(JSON.parse(localStorage.getItem('favs')||'[]')),st={q:'',lim:100,sort:'cap',tab:'all'};
+let flash={};
+async function loadCoins(){
+ const prevP={};coins.forEach(c=>prevP[c.id]=c.current_price);
+ try{
+  coins=await j(`${CG}/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=true&price_change_percentage=24h,7d,30d`);
+  localStorage.setItem('mk',JSON.stringify({t:Date.now(),d:coins.map(c=>({...c,sparkline_in_7d:{price:(c.sparkline_in_7d?.price||[]).filter((_,i)=>i%4===0)}}))}));
+  $('status').textContent='Обновлено '+new Date().toLocaleTimeString('ru-RU')+' · CoinGecko';
+ }catch(e){
+  const m=JSON.parse(localStorage.getItem('mk')||'null');
+  if(m&&!coins.length){coins=m.d;$('status').textContent='Лимит API: показаны данные от '+new Date(m.t).toLocaleTimeString('ru-RU')}
+  else if(!coins.length)$('status').textContent='Не удалось загрузить список (лимит API).';
+ }
+ flash={};coins.forEach(c=>{const o=prevP[c.id];if(o!=null&&o!==c.current_price)flash[c.id]=c.current_price>o?'fu':'fd'});route(true);flash={};
+}
+
+// ---------- рынок ----------
+const SORTS={cap:(a,b)=>b.market_cap-a.market_cap,price:(a,b)=>b.current_price-a.current_price,gain:(a,b)=>b.price_change_percentage_24h-a.price_change_percentage_24h,loss:(a,b)=>a.price_change_percentage_24h-b.price_change_percentage_24h};
+function spark(c){const d=c.sparkline_in_7d?.price||[];if(d.length<2)return '';const hi=Math.max(...d),lo=Math.min(...d),n=d.length;
+ const pts=d.map((v,i)=>(i/(n-1)*100).toFixed(1)+','+(2+(1-(v-lo)/(hi-lo||1))*24).toFixed(1)).join(' ');
+ return `<svg class="sp" viewBox="0 0 100 28" preserveAspectRatio="none"><polyline points="${pts}" fill="none" stroke="${d[n-1]>=d[0]?'var(--up)':'var(--down)'}" stroke-width="1.6" vector-effect="non-scaling-stroke"/></svg>`}
+function showMarket(){
+ $('app').innerHTML=`<div class="panel"><div class="bar"><input id="q" type="search" placeholder="🔍 Поиск: Bitcoin, Ethereum, SOL…" value="${esc(st.q)}"><select id="lim"><option value="50">Top 50</option><option value="100">Top 100</option></select><select id="srt"><option value="cap">По капитализации</option><option value="price">По цене</option><option value="gain">Рост за 24ч</option><option value="loss">Падение за 24ч</option></select></div><div class="tabs" id="mt"></div><div class="row hd"><span></span><span class="rk">#</span><span>Монета</span><span style="text-align:right">Цена</span><span style="text-align:right">24ч</span><span class="x" style="text-align:right">Капитализация</span><span class="x" style="text-align:right">7 дней</span></div><div id="rows"></div></div>`;
+ $('lim').value=st.lim;$('srt').value=st.sort;
+ $('q').oninput=e=>{st.q=e.target.value;rows()};$('lim').onchange=e=>{st.lim=+e.target.value;rows()};$('srt').onchange=e=>{st.sort=e.target.value;rows()};
+ $('rows').onclick=e=>{const f=e.target.closest('[data-fav]');if(f){toggleFav(f.dataset.fav);return}const r=e.target.closest('[data-id]');if(r)location.hash='#/coin/'+r.dataset.id};
+ rows();
+}
+function toggleFav(id){favs.has(id)?favs.delete(id):favs.add(id);localStorage.setItem('favs',JSON.stringify([...favs]));if($('rows'))rows();else if($('favbtn'))$('favbtn').className='st'+(favs.has(id)?' on':'')}
+function rows(){
+ $('mt').innerHTML=`<button class="tab ${st.tab==='all'?'on':''}" onclick="st.tab='all';rows()">Все</button><button class="tab ${st.tab==='fav'?'on':''}" onclick="st.tab='fav';rows()">⭐ Избранное (${favs.size})</button>`;
+ if(!coins.length){$('rows').innerHTML=skRows(10);return}
+ const q=st.q.trim().toLowerCase();
+ let l=coins.slice(0,st.lim).filter(c=>(st.tab==='all'||favs.has(c.id))&&(!q||c.name.toLowerCase().includes(q)||c.symbol.toLowerCase().includes(q)));
+ l.sort(SORTS[st.sort]);
+ $('rows').innerHTML=l.length?l.map(c=>`<div class="row" data-id="${esc(c.id)}"><button class="st ${favs.has(c.id)?'on':''}" data-fav="${esc(c.id)}" aria-label="Избранное">${favs.has(c.id)?'★':'☆'}</button><span class="rk">${c.market_cap_rank}</span><div class="who"><div class="ic">${logo(c)}</div><div><b>${esc(c.symbol.toUpperCase())}</b><small>${esc(c.name)}</small></div></div><b class="p ${flash[c.id]||''}">${fmt(c.current_price)}</b><span class="ch ${c.price_change_percentage_24h>=0?'up':'down'}">${pc(c.price_change_percentage_24h)}</span><span class="cp">${big(c.market_cap)}</span>${spark(c)}</div>`).join(''):`<div class="msg">${st.tab==='fav'?'Пока пусто. Нажми ☆ рядом с монетой, чтобы добавить.':'Ничего не найдено'}</div>`;
+}
+
+// ---------- страница монеты ----------
+const RANGES=[{k:'1h',l:'1Ч',i:'1m',n:60},{k:'24h',l:'24Ч',i:'15m',n:96},{k:'7d',l:'7Д',i:'1h',n:168},{k:'1m',l:'1М',i:'4h',n:180},{k:'1y',l:'1Г',i:'1d',n:365}];
+let rng='24h',detail={},tok=0;
+function showCoin(id){
+ const c=coins.find(x=>x.id===id);
+ if(!c&&!coins.length){$('app').innerHTML=`<button class="back" onclick="location.hash=''">← К рынку</button>`+skCoin();return}
+ if(!c){$('app').innerHTML='<div class="msg">'+(coins.length?'Монета не найдена (доступны Top 100).':'Загрузка…')+'</div><button class="back" onclick="location.hash=\'\'">← К рынку</button>';return}
+ $('app').innerHTML=`<button class="back" onclick="location.hash=''">← К рынку</button><div class="panel">
+ <div class="head"><div><div class="hd2"><div class="ic">${logo(c)}</div><span>${esc(c.name)} · ${esc(c.symbol.toUpperCase())} · #${c.market_cap_rank}</span><button id="favbtn" class="st ${favs.has(c.id)?'on':''}" onclick="toggleFav('${esc(c.id)}');this.textContent=favs.has('${esc(c.id)}')?'★':'☆'">${favs.has(c.id)?'★':'☆'}</button></div><div class="big">${fmt(c.current_price)}</div></div><div id="pch" class="ch"></div></div>
+ <div class="tabs" id="rt"></div><svg id="chart" viewBox="0 0 640 300" preserveAspectRatio="none"></svg>
+ <div class="stats" id="stats"></div></div>
+ <div class="panel"><b>О проекте</b><div class="about" id="about">${skLines()}</div><div class="links" id="links"></div></div>`;
+ rt(c);stats(c);chart(c);
+ clearInterval(coinT);coinT=setInterval(()=>{const cc=coins.find(x=>x.id===id);if(cc&&$('chart')&&!document.hidden)chart(cc,true)},15000);
+ if(detail[id])fill(detail[id]);else j(`${CG}/coins/${id}?localization=false&tickers=false&community_data=false&developer_data=false&sparkline=false`).then(d=>{detail[id]=d;if(location.hash.endsWith(id)){stats(c);fill(d)}}).catch(()=>{$('about').textContent='Описание недоступно (лимит API). Обнови страницу через минуту.'});
+}
+function rt(c){$('rt').innerHTML=RANGES.map(r=>`<button class="tab ${r.k===rng?'on':''}" onclick="rng='${r.k}';rt(coins.find(x=>x.id==='${esc(c.id)}'));chart(coins.find(x=>x.id==='${esc(c.id)}'))">${r.l}</button>`).join('')}
+function stats(c){
+ const m=detail[c.id]?.market_data,g=(a,b)=>m?m[a]?.usd:c[b],item=(l,v)=>`<div class="stat"><small>${l}</small><b>${v}</b></div>`;
+ const ath=g('ath','ath'),atl=g('atl','atl'),athD=m?m.ath_date?.usd:c.ath_date,atlD=m?m.atl_date?.usd:c.atl_date,athC=m?m.ath_change_percentage?.usd:c.ath_change_percentage,atlC=m?m.atl_change_percentage?.usd:c.atl_change_percentage;
+ $('stats').innerHTML=item('Капитализация',big(g('market_cap','market_cap')))+item('Объём торгов 24ч',big(g('total_volume','total_volume')))+item('В обращении',c.circulating_supply?Math.round(c.circulating_supply).toLocaleString('ru-RU')+' '+esc(c.symbol.toUpperCase()):'–')
+ +item('ATH (рекорд)',`${fmt(ath)}<br><small>${dt(athD)} · ${athC!=null?athC.toFixed(1)+'%':''}</small>`)+item('ATL (минимум)',`${fmt(atl)}<br><small>${dt(atlD)} · ${atlC!=null?'+'+Math.round(atlC).toLocaleString('ru-RU')+'%':''}</small>`)+item('Изменение за 24ч',`<span class="${c.price_change_percentage_24h>=0?'up':'down'}">${pc(c.price_change_percentage_24h)}</span>`);
+}
+function fill(d){
+ const t=new DOMParser().parseFromString(d.description?.en||'','text/html').body.textContent.trim();
+ $('about').textContent=t?(t.length>700?t.slice(0,700).replace(/\s\S*$/,'')+'…':t):'Описание отсутствует.';
+ const L=[],h=d.links?.homepage?.find(x=>x),w=d.links?.whitepaper;
+ const safe=u=>/^https?:\/\//.test(u||'');
+ if(safe(h))L.push(['🌐 Сайт проекта',h]);if(safe(w))L.push(['📄 Whitepaper',w]);
+ $('links').innerHTML=L.length?'':'<span class="about">Ссылки недоступны</span>';
+ L.forEach(([n,u])=>{const a=document.createElement('a');a.href=u;a.target='_blank';a.rel='noopener noreferrer';a.textContent=n;$('links').appendChild(a)});
+}
+// ---------- skeleton-заглушки ----------
+const sk=(w,h,x='')=>`<span class="sk" style="width:${w};height:${h};${x}"></span>`;
+const SK1=sk('150px','34px','margin:4px 0');
+const SK2=`<div class="two"><div class="card">${sk('70px','28px')}</div><div class="card">${sk('70px','28px')}</div></div>${sk('100%','22px','margin-top:12px;border-radius:11px')}`;
+const SKG=`<div class="ph"><b>Fear & Greed Index</b></div>${sk('120px','34px','margin:6px 0')}${sk('100%','14px','margin:16px 0;border-radius:7px')}${sk('60%','12px')}`;
+const skLines=()=>sk('100%','12px','margin:8px 0')+sk('94%','12px','margin:8px 0')+sk('72%','12px','margin:8px 0');
+const skPage=()=>`<div class="panel">${sk('160px','16px','margin-bottom:14px')}${sk('100%','44px')}</div><div class="panel">${skLines()}${skLines()}</div>`;
+const skAl=n=>Array.from({length:n},()=>`<div class="al sk-row"><div class="who"><div class="ic sk" style="border-radius:50%"></div><div>${sk('60px','12px','margin-bottom:6px')}${sk('90px','10px')}</div></div><div>${sk('70px','14px','margin-bottom:6px')}${sk('50px','10px','margin-left:auto')}</div></div>`).join('');
+const skRows=n=>Array.from({length:n},()=>`<div class="row sk-row"><span>${sk('18px','18px','border-radius:50%')}</span><span class="rk">${sk('18px','12px')}</span><div class="who"><div class="ic sk" style="border-radius:50%"></div><div style="flex:1">${sk('54px','12px','margin-bottom:6px')}${sk('90px','10px')}</div></div><span class="p">${sk('70px','14px')}</span><span class="ch">${sk('46px','12px','margin-left:auto')}</span><span class="cp">${sk('80px','12px','margin-left:auto')}</span><span class="sp">${sk('100px','28px')}</span></div>`).join('');
+const skF=n=>Array.from({length:n},()=>`<div class="frow sk-row"><div class="who"><div class="ic sk" style="border-radius:50%"></div>${sk('50px','12px')}</div>${sk('70px','14px','margin-left:auto')}${sk('50px','12px','margin-left:auto')}${sk('56px','12px','margin-left:auto')}<span class="m">${sk('70px','12px','margin-left:auto')}</span></div>`).join('');
+function barsRects(){let b='';for(let i=0;i<40;i++){const h=60+Math.round((Math.sin(i*.45)+Math.sin(i*.17+1))*45+90);b+=`<rect class="skb" x="${i*16+3}" y="${290-h}" width="10" height="${h}" rx="3" style="animation-delay:${i*45}ms"/>`}return b}
+const skCoin=()=>`<div class="panel"><div class="head"><div><div class="hd2"><div class="ic sk" style="border-radius:50%"></div>${sk('180px','14px')}</div>${sk('210px','34px','margin-top:10px')}</div></div><div class="tabs">${Array(5).fill(sk('48px','28px','border-radius:999px')).join('')}</div><svg viewBox="0 0 640 300" preserveAspectRatio="none" style="width:100%;height:280px;display:block">${barsRects()}</svg><div class="stats">${Array(6).fill(`<div class="stat">${sk('70px','11px','margin-bottom:8px')}${sk('90px','16px')}</div>`).join('')}</div></div><div class="panel">${skLines()}</div>`;
+const _rows=rows;rows=function(){const r0=$('rows'),fresh=!!(r0&&r0.firstElementChild&&r0.firstElementChild.classList.contains('sk-row'));_rows();if(fresh&&coins.length){const r=$('rows');if(r){r.classList.add('in');setTimeout(()=>r.classList.remove('in'),600)}}};
+
+// ---------- график ----------
+const cch={};let chartAnim=0,chartPrev=null,coinT=0;
+const NPT=120,RM=matchMedia('(prefers-reduced-motion: reduce)').matches,ease=t=>1-Math.pow(1-t,3);
+function resample(a,n){const m=a.length,o=new Array(n);for(let i=0;i<n;i++){const t=i/(n-1)*(m-1),k=Math.floor(t),f=t-k;o[i]=a[k]+(a[Math.min(k+1,m-1)]-a[k])*f}return o}
+function drawSk(){const svg=$('chart');if(!svg)return;cancelAnimationFrame(chartAnim);chartPrev=null;svg.innerHTML=barsRects()}
+async function chart(c,quiet){
+ const r=RANGES.find(x=>x.k===rng),key=c.id+rng,my=++tok;
+ let d=cch[key]&&Date.now()-cch[key].t<30000?cch[key].p:null,note='';
+ if(!d){if(!quiet)drawSk();
+  try{const k=await j(`${BN}/klines?symbol=${c.symbol.toUpperCase()}USDT&interval=${r.i}&limit=${r.n}`,8000);d=k.map(x=>+x[4]);cch[key]={t:Date.now(),p:d}}
+  catch(e){if(quiet)return;d=c.sparkline_in_7d?.price;note='График за 7 дней (биржа Binance недоступна для этой монеты)'}}
+ if(my===tok)draw(d,c,note,key);
+}
+function draw(d,c,note,key){
+ const svg=$('chart');if(!svg)return;
+ if(!d||d.length<2){cancelAnimationFrame(chartAnim);chartPrev=null;svg.innerHTML='<text x="320" y="150" text-anchor="middle" fill="var(--mute)" font-size="16">Нет данных</text>';return}
+ const n=d.length,hi=Math.max(...d),lo=Math.min(...d),p=(d[n-1]/d[0]-1)*100,col=p>=0?'var(--up)':'var(--down)';
+ const T=resample(d,NPT).map(v=>10+(1-(v-lo)/(hi-lo||1))*250);
+ if(!$('cpl')){
+  let g='';for(let k=0;k<5;k++)g+=`<line x1="0" x2="640" y1="${10+k*62.5}" y2="${10+k*62.5}" stroke="var(--line)" vector-effect="non-scaling-stroke"/>`;
+  svg.innerHTML=`<defs><linearGradient id="gr" x1="0" y1="0" x2="0" y2="1"><stop id="gs1" offset="0" style="stop-color:${col}" stop-opacity=".35"/><stop id="gs2" offset="1" style="stop-color:${col}" stop-opacity="0"/></linearGradient></defs>${g}<polygon id="cpg" fill="url(#gr)"/><polyline id="cpl" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round" vector-effect="non-scaling-stroke" style="color:${col}"/><text id="cpn" x="8" y="292" fill="var(--mute)" font-size="12"></text>`;
+ }else{$('cpl').style.color=col;$('gs1').style.stopColor=col;$('gs2').style.stopColor=col}$('cpn').textContent=note||'';
+ const e=$('pch');if(e){e.className='ch '+(p>=0?'up':'down');e.textContent=pc(p)+' за период · макс '+fmt(hi)+' · мин '+fmt(lo)}
+ const from=chartPrev?chartPrev.ys.slice():new Array(NPT).fill(T[0]),dur=RM?0:(chartPrev?500:800);
+ cancelAnimationFrame(chartAnim);
+ const t0=performance.now();
+ const step=now=>{const pl=$('cpl'),pg=$('cpg');if(!pl||!pg)return;
+  const k=dur?Math.min(1,(now-t0)/dur):1,q=ease(k),ys=from.map((v,i)=>v+(T[i]-v)*q);
+  const pts=ys.map((v,i)=>(i/(NPT-1)*640).toFixed(1)+','+v.toFixed(1)).join(' ');
+  pl.setAttribute('points',pts);pg.setAttribute('points','0,300 '+pts+' 640,300');
+  chartPrev={ys,key};if(k<1)chartAnim=requestAnimationFrame(step)};
+ step(performance.now());
+}
+
+// ---------- портфель ----------
+let pf=JSON.parse(localStorage.getItem('pf')||'[]');
+const sg=v=>(v>=0?'+':'−')+'$'+Math.abs(v).toLocaleString('en-US',{maximumFractionDigits:2});
+const num=t=>parseFloat(String(t).replace(',','.'));
+const PAL=['#6c8cff','#f7931a','#2ecc8f','#b44cff','#ff5c6c','#2fc4e8','#f5b301','#8793a8'];
+const cls=v=>v>=0?'up':'down';
+function positions(){const m={};pf.forEach(b=>{const o=m[b.id]??={id:b.id,amt:0,cost:0};o.amt+=b.amt;o.cost+=b.amt*b.price});
+ return Object.values(m).map(o=>{const c=coins.find(x=>x.id===o.id);return c?{...o,c,avg:o.cost/o.amt,val:o.amt*c.current_price}:null}).filter(Boolean).sort((a,b)=>b.val-a.val)}
+function showPortfolio(){
+ if(!coins.length){$('app').innerHTML=skPage();return}$('app').innerHTML=`<div class="panel"><b>Добавить покупку</b><div class="form" style="margin-top:10px">
+ <select id="fc">${coins.map(c=>`<option value="${esc(c.id)}">${esc(c.symbol.toUpperCase())} —${esc(c.name)}</option>`).join('')}</select>
+ <input id="fa" inputmode="decimal" placeholder="Количество, напр. 0.1">
+ <input id="fp" inputmode="decimal" placeholder="Цена покупки, $">
+ <button class="btn" id="fb">Купить</button></div><div class="hint" id="fh"></div></div><div id="pfdyn"></div>`;
+ const hint=()=>{const c=coins.find(x=>x.id===$('fc').value);$('fp').placeholder='Цена покупки, $ (пусто = '+fmt(c.current_price)+')'};
+ $('fc').onchange=hint;hint();$('fb').onclick=()=>{const c=coins.find(x=>x.id===$('fc').value),a=num($('fa').value),pr=$('fp').value.trim()?num($('fp').value):c.current_price;
+  if(!(a>0)||!(pr>0)){$('fh').textContent='Введи количество и цену числом больше нуля.';return}
+  pf.push({id:c.id,amt:a,price:pr,ts:Date.now()});localStorage.setItem('pf',JSON.stringify(pf));
+  $('fa').value='';$('fp').value='';$('fh').textContent=`Добавлено: ${a} ${c.symbol.toUpperCase()} по ${fmt(pr)}`;pfDyn()};
+ pfDyn();
+}
+function pfDyn(){
+ const P=positions(),total=P.reduce((s,p)=>s+p.val,0),cost=P.reduce((s,p)=>s+p.cost,0),pl=total-cost;
+ if(!P.length){$('pfdyn').innerHTML='<div class="panel msg">Портфель пуст. Добавь первую покупку выше.</div>';return}
+ const per=f=>{let now=0,then=0;P.forEach(p=>{const ch=p.c[f];now+=p.val;then+=ch==null?p.val:p.val/(1+ch/100)});return{pct:then?(now/then-1)*100:0,abs:now-then}};
+ const R=[['Сегодня','price_change_percentage_24h_in_currency'],['Неделя','price_change_percentage_7d_in_currency'],['Месяц','price_change_percentage_30d_in_currency']].map(([l,f])=>{const r=per(f);return`<div class="card"><small>${l}</small><b class="${cls(r.pct)}">${r.pct>=0?'+':''}${r.pct.toFixed(2)}%</b><small class="${cls(r.abs)}">${sg(r.abs)}</small></div>`}).join('');
+ $('pfdyn').innerHTML=`<div class="panel"><div class="sum"><div><small>Общая стоимость портфеля</small><div class="big">$${total.toLocaleString('en-US',{maximumFractionDigits:0})}</div></div>
+ <div style="text-align:right"><small>Прибыль</small><div class="big ${cls(pl)}">${sg(pl)}</div><small class="${cls(pl)}">${cost?(pl>=0?'+':'')+(pl/cost*100).toFixed(2)+'%':''} · вложено $${cost.toLocaleString('en-US',{maximumFractionDigits:0})}</small></div></div>
+ <div class="cards">${R}</div><div class="hint">Доходность считается по текущему составу портфеля, как если бы он был у тебя весь период.</div></div>
+ <div class="panel"><div class="alloc">${P.map((p,i)=>`<div title="${esc(p.c.symbol.toUpperCase())}" style="width:${p.val/total*100}\%;background:${PAL[i%PAL.length]}"></div>`).join('')}</div>
+ <div class="leg">${P.map((p,i)=>`<span><i style="background:${PAL[i%PAL.length]}"></i>${esc(p.c.symbol.toUpperCase())}${(p.val/total*100).toFixed(1)}%</span>`).join('')}<span><b style="color:var(--text)">Total $${total.toLocaleString('en-US',{maximumFractionDigits:0})}</b></span></div>
+ <div class="prow hd" style="color:var(--mute);font-size:12px"><span>Монета</span><span>Кол-во</span><span class="m">Ср. цена покупки</span><span class="m">Цена сейчас</span><span>Стоимость</span><span class="m">Доля</span><span>Прибыль</span><span></span></div>
+ ${P.map(p=>{const d=p.val-p.cost;return`<div class="prow"><div class="who"><div class="ic">${logo(p.c)}</div><div><b>${esc(p.c.symbol.toUpperCase())}</b></div></div><span>${+p.amt.toPrecision(8)}</span><span class="m">${fmt(p.avg)}</span><span class="m">${fmt(p.c.current_price)}</span><b>${fmt(p.val)}</b><span class="m">${(p.val/total*100).toFixed(1)}%</span><span class="${cls(d)}">${sg(d)}<br><small>${(d>=0?'+':'')+(d/p.cost*100).toFixed(1)}%</small></span><button class="x2" title="Удалить позицию" onclick="delPos('${esc(p.id)}')">✕</button></div>`}).join('')}</div>`;
+}
+function delPos(id){if(confirm('Удалить все покупки этой монеты из портфеля?')){pf=pf.filter(b=>b.id!==id);localStorage.setItem('pf',JSON.stringify(pf));pfDyn()}}
+
+// ---------- futures ----------
+const FA='https://fapi.binance.com',FS=['BTC','ETH','SOL','BNB','XRP'];
+let fsym='BTC',futT=null,fund={},tk={},fd=null,fgi=null,futErr='',fview='o',fN=50,fsort='vol',fqs='';
+const liq={long:0,short:0,per:{},since:Date.now(),n:0};
+const ms=v=>v==null||isNaN(v)?'–':'$'+(v>=1e9?(v/1e9).toFixed(2)+'B':v>=1e6?(v/1e6).toFixed(1)+'M':v>=1e3?(v/1e3).toFixed(1)+'K':Math.round(v));
+const hm=t=>new Date(t).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
+const LU=['wss://fstream.binance.com/market/ws/!forceOrder@arr','wss://fstream.binance.com/ws/!forceOrder@arr'];let lui=0;
+function connectLiq(){liq.state='connecting';let opened=false;
+ try{const ws=new WebSocket(LU[lui]);
+ ws.onopen=()=>{opened=true;liq.state='live';renderLiq()};
+ ws.onmessage=e=>{try{const o=JSON.parse(e.data).o,v=(+o.ap||+o.p)*(+o.z||+o.q),side=o.S==='SELL'?'long':'short',k=o.s.replace('USDT','');
+  liq[side]+=v;liq.n++;liq.last=Date.now();(liq.per[k]??={long:0,short:0})[side]+=v;renderLiq()}catch(_){}};
+ ws.onclose=()=>{liq.state=opened?'reconnect':'fail';if(!opened)lui=(lui+1)%LU.length;renderLiq();setTimeout(connectLiq,opened?3000:5000)}}catch(e){liq.state='fail';renderLiq()}}
+function line(d,col){const n=d.length,hi=Math.max(...d),lo=Math.min(...d),y=v=>8+(1-(v-lo)/(hi-lo||1))*184;
+ return `<svg class="mini" viewBox="0 0 640 200" preserveAspectRatio="none"><polyline points="${d.map((v,i)=>(i/(n-1)*640).toFixed(1)+','+y(v).toFixed(1)).join(' ')}" fill="none" stroke="${col}" stroke-width="2.5" vector-effect="non-scaling-stroke"/></svg>`}
+async function loadFut(){
+ const sym=fsym+'USDT',L=u=>j(FA+u,8000);
+ const r=await Promise.allSettled([L('/fapi/v1/premiumIndex'),L('/fapi/v1/openInterest?symbol='+sym),L('/futures/data/openInterestHist?symbol='+sym+'&period=1h&limit=48'),L('/futures/data/globalLongShortAccountRatio?symbol='+sym+'&period=5m&limit=1'),L('/fapi/v1/ticker/24hr',12000)]);
+ const v=i=>r[i].status==='fulfilled'?r[i].value:null;
+ if(v(0))v(0).forEach(x=>{if(/^[A-Z0-9]+USDT$/.test(x.symbol))fund[x.symbol.slice(0,-4)]=x});
+ if(v(4))v(4).forEach(x=>{if(/^[A-Z0-9]+USDT$/.test(x.symbol))tk[x.symbol.slice(0,-4)]={chg:+x.priceChangePercent,vol:+x.quoteVolume}});
+ if(fsym===sym.replace('USDT','')){fd={oi:v(1)?+v(1).openInterest:null,hist:(v(2)||[]).map(h=>+h.sumOpenInterestValue),ls:v(3)?.[0]||null}}
+ futErr=r.every(x=>x.status==='rejected')?'Binance Futures недоступен (проверь интернет, VPN или регион).':'';
+ $('status').textContent=futErr||'Обновлено '+new Date().toLocaleTimeString('ru-RU')+' · Binance Futures';
+ renderFut();
+}
+async function loadFgi(){try{fgi=(await j('https://api.alternative.me/fng/?limit=30')).data.map(x=>({v:+x.value,t:+x.timestamp*1000}));renderFgi()}catch(e){if($('fgibox'))$('fgibox').innerHTML='<div class="msg">Fear & Greed недоступен</div>'}}
+function showFutures(){
+ $('app').innerHTML=`<div id="fut"><div class="tabs" id="fv"></div><div id="fover"><div class="tabs" id="ft"></div><div class="panel" id="ffund"></div><div class="panel" id="foi"></div><div class="panel" id="fls"></div><div class="panel" id="liqbox"></div><div class="panel" id="fgibox">${SKG}</div></div>
+ <div id="flist" hidden><div class="panel"><div class="bar"><input id="fq" type="search" placeholder="🔍 Поиск тикера: BTC, SOL…"><select id="fn"><option value="50">Top 50</option><option value="100">Top 100</option></select><select id="fsr"><option value="vol">По объёму торгов</option><option value="fh">Funding: высокий</option><option value="fl">Funding: низкий</option><option value="gain">Рост за 24ч</option><option value="loss">Падение за 24ч</option></select></div>
+ <div class="hint" style="margin:0 0 8px">Топ перпетуальных USDT-контрактов Binance Futures по объёму торгов за 24ч. Нажми на монету, чтобы открыть Funding, Open Interest и Long/Short.</div>
+ <div class="frow hd"><span>Монета</span><span>Mark price</span><span>24ч</span><span>Funding</span><span class="m">Объём 24ч</span></div><div id="frows">${skF(8)}</div></div></div></div>`;
+ $('fq').oninput=e=>{fqs=e.target.value;renderList()};$('fn').onchange=e=>{fN=+e.target.value;renderList()};$('fsr').onchange=e=>{fsort=e.target.value;renderList()};$('frows').onclick=e=>{const r=e.target.closest('[data-s]');if(r){fsym=r.dataset.s;fd=null;fview='o';setFv();renderFut();loadFut();scrollTo(0,0)}};
+ setFv();renderFut();renderLiq();renderFgi();loadFut();if(!fgi)loadFgi();
+ futT=setInterval(loadFut,30000);
+}
+function setFv(){if(!$('fut'))return;$('fover').hidden=fview!=='o';$('flist').hidden=fview!=='l';$('fv').innerHTML=`<button class="tab ${fview==='o'?'on':''}" onclick="fview='o';setFv()">📊 Обзор · ${fsym}</button><button class="tab ${fview==='l'?'on':''}" onclick="fview='l';setFv()">📋 Все монеты (Top 50 / 100)</button>`;renderList()}
+const FSORT={vol:(a,b)=>b.t.vol-a.t.vol,fh:(a,b)=>b.fr-a.fr,fl:(a,b)=>a.fr-b.fr,gain:(a,b)=>b.t.chg-a.t.chg,loss:(a,b)=>a.t.chg-b.t.chg};
+function renderList(){
+ if(!$('frows')||fview!=='l')return;
+ const all=Object.keys(tk).filter(k=>fund[k]).map(k=>({k,t:tk[k],fr:+fund[k].lastFundingRate*100,mp:+fund[k].markPrice})).sort(FSORT.vol).slice(0,fN);
+ if(!all.length){$('frows').innerHTML=futErr?`<div class="msg">${futErr}</div>`:skF(8);return}
+ const q=fqs.trim().toUpperCase(),l=all.filter(x=>!q||x.k.includes(q)).sort(FSORT[fsort]);
+ $('frows').innerHTML=l.length?l.map(x=>{const c=coins.find(y=>y.symbol.toUpperCase()===x.k)||{symbol:x.k};
+  return `<div class="frow" data-s="${esc(x.k)}"><div class="who"><div class="ic">${logo(c)}</div><div><b>${esc(x.k)}</b></div></div><b>${fmt(x.mp)}</b><span class="ch ${cls(x.t.chg)}">${pc(x.t.chg)}</span><span class="${cls(x.fr)}">${x.fr.toFixed(4)}%</span><span class="m">${ms(x.t.vol)}</span></div>`}).join(''):'<div class="msg">Ничего не найдено</div>'}
+function renderFut(){
+ if(!$('fut'))return;renderList();$('ft').innerHTML=(FS.includes(fsym)?FS:[...FS,fsym]).map(k=>`<button class="tab ${k===fsym?'on':''}" onclick="fsym='${k}';fd=null;setFv();renderFut();loadFut()">${k}USDT${fund[k]?' · '+(+fund[k].lastFundingRate*100).toFixed(4)+'%':''}</button>`).join('');
+ const f=fund[fsym],rate=f?+f.lastFundingRate*100:null;
+ $('ffund').innerHTML=`<div class="ph"><b>Funding Rate · ${fsym}USDT</b><span class="fsub">${f?'Следующий расчёт: '+hm(+f.nextFundingTime):''}</span></div>
+ <div class="fbig ${rate==null?'':cls(rate)}">${rate==null?(futErr?'–':SK1):rate.toFixed(4)+'%'}</div>
+ <div class="fsub">${f?'Годовых ≈ '+(rate*3*365).toFixed(1)+'% · Mark price '+fmt(+f.markPrice)+' · ':''}${rate==null?'':rate>=0?'лонги платят шортам':'шорты платят лонгам'}</div>`;
+ const mp=f?+f.markPrice:null,oiUsd=fd?.oi&&mp?fd.oi*mp:fd?.hist?.at(-1),h=fd?.hist||[];
+ const chg=h.length>1?(h.at(-1)/h[0]-1)*100:null;
+ $('foi').innerHTML=`<div class="ph"><b>Open Interest · ${fsym}USDT</b><span class="fsub">${chg==null?'':'за 48ч: <span class="'+cls(chg)+'">'+(chg>=0?'+':'')+chg.toFixed(2)+'%</span>'}</span></div>
+ <div class="fbig">${oiUsd==null&&!futErr?SK1:ms(oiUsd)}</div><div class="fsub">${fd?.oi?Math.round(fd.oi).toLocaleString('ru-RU')+' '+fsym:''}</div>${h.length>1?line(h,'var(--acc)'):''}`;
+ const l=fd?.ls,lp=l?+l.longAccount*100:null,sp=l?+l.shortAccount*100:null;
+ $('fls').innerHTML=`<div class="ph"><b>Long / Short Ratio · ${fsym}USDT</b><span class="fsub">${l?'Соотношение '+(+l.longShortRatio).toFixed(2):''} · доля аккаунтов</span></div>
+ ${l?`<div class="two"><div class="card"><small>Long</small><b class="up">${lp.toFixed(0)}%</b></div><div class="card"><small>Short</small><b class="down">${sp.toFixed(0)}%</b></div></div><div class="lsbar"><div style="width:${lp}\%;background:var(--up)">${lp.toFixed(1)}%</div><div style="width:${sp}\%;background:var(--down)">${sp.toFixed(1)}%</div></div>`:(fd===null&&!futErr?SK2:'<div class="msg">Нет данных</div>')}`;
+ if(futErr&&!fd)$('ffund').insertAdjacentHTML('beforeend','<div class="fsub down">'+futErr+'</div>');
+}
+function renderLiq(){
+ const b=$('liqbox');if(!b)return;const p=liq.per[fsym]||{long:0,short:0};
+ b.innerHTML=`<div class="ph"><b>Ликвидации (Binance Futures, все USDT-пары)</b><span class="fsub">${{live:'<span class="up">● подключено</span>',connecting:'○ подключение…',reconnect:'○ переподключение…',fail:'<span class="down">○ нет соединения с Binance WebSocket</span>'}[liq.state]||''} · с ${hm(liq.since)} · событий: ${liq.n}${liq.last?' · последнее '+hm(liq.last):''}</span></div>
+ <div class="two"><div class="card"><small>Long Liquidations</small><b class="down">${ms(liq.long)}</b></div><div class="card"><small>Short Liquidations</small><b class="up">${ms(liq.short)}</b></div></div>
+ <div class="fsub" style="margin-top:8px">Только ${fsym}: лонги ${ms(p.long)} · шорты ${ms(p.short)}</div>
+ <div class="hint">Считаются в реальном времени с момента открытия страницы (публичного API с суммой за 24ч у Binance нет). Binance присылает не более одной ликвидации в секунду на монету, поэтому сумма немного занижена. В спокойный рынок событий может не быть по несколько минут.</div>`;
+}
+const fgl=v=>v<25?['Крайний страх','Extreme Fear','🟥']:v<45?['Страх','Fear','🟧']:v<56?['Нейтрально','Neutral','🟨']:v<76?['Жадность','Greed','🟩']:['Крайняя жадность','Extreme Greed','🟢'];
+const fgc=v=>v<25?'#ff4d4d':v<45?'#ff9f43':v<56?'#f5c518':v<76?'#8bd450':'#2ecc8f';
+function renderFgi(){
+ const b=$('fgibox');if(!b||!fgi)return;const n=fgi[0],[ru,en,em]=fgl(n.v),at=i=>fgi[i]?`<div class="card"><small>${['','Вчера','','','','','','Неделю назад'][i]||'Месяц назад'}</small><b style="color:${fgc(fgi[i].v)}">${fgi[i].v}</b> <small style="display:inline">${fgl(fgi[i].v)[0]}</small></div>`:'';
+ b.innerHTML=`<div class="ph"><b>Fear & Greed Index</b><span class="fsub">alternative.me · обновляется раз в сутки</span></div>
+ <div class="fbig" style="color:${fgc(n.v)}">${n.v} ${em}</div><div class="fsub" style="font-size:16px">${ru} · ${en}</div>
+ <div class="fgbar"><i style="left:${n.v}%"></i></div><div class="ph fsub"><span>0 · Страх</span><span>100 · Жадность</span></div>
+ <div class="fgs">${at(1)}${at(7)}${at(29)}</div>${line(fgi.map(x=>x.v).reverse(),fgc(n.v))}<div class="fsub">Динамика за 30 дней</div>`;
+}
+
+// ---------- алерты ----------
+let al=JSON.parse(localStorage.getItem('al')||'[]'),as=JSON.parse(localStorage.getItem('alset')||'{"tg":{},"em":{}}'),alBusy=false;
+as.tg??={};as.em??={};
+const saveAl=()=>localStorage.setItem('al',JSON.stringify(al)),saveSet=()=>localStorage.setItem('alset',JSON.stringify(as));
+async function tgSend(text){const{tok,chat}=as.tg;if(!tok||!chat)throw new Error('Telegram не настроен');
+ const r=await fetch(`https://api.telegram.org/bot${encodeURIComponent(tok)}/sendMessage`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:chat,text})});
+ const d=await r.json();if(!d.ok)throw new Error(d.description||'ошибка Telegram')}
+async function emSend(subject,message){const e=as.em;if(!e.svc||!e.tpl||!e.key||!e.to)throw new Error('Email не настроен');
+ const r=await fetch('https://api.emailjs.com/api/v1.0/email/send',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({service_id:e.svc,template_id:e.tpl,user_id:e.key,template_params:{to_email:e.to,subject,message}})});
+ if(!r.ok)throw new Error((await r.text())||'ошибка EmailJS')}
+const alText=(a,p)=>(a.dir==='>'?`🚀 ${a.sym} достиг ${fmt(a.price)}`:`📉 ${a.sym} упал до ${fmt(a.price)}`)+`\nСейчас: ${fmt(p)}`;
+async function notify(a,p){const t=alText(a,p);a.err='';
+ if(a.via.includes('br')&&'Notification' in window&&Notification.permission==='granted')try{new Notification('CryptoWatch',{body:t})}catch(e){}
+ if(a.via.includes('tg'))try{await tgSend(t)}catch(e){a.err+='Telegram: '+e.message+'. '}
+ if(a.via.includes('em'))try{await emSend(`${a.sym} ${a.dir} ${fmt(a.price)}`,t)}catch(e){a.err+='Email: '+e.message+'. '}
+ saveAl();if($('aldyn'))alDyn()}
+async function checkAlerts(){
+ const act=al.filter(a=>!a.done);if(alBusy||!act.length)return;alBusy=true;
+ try{const P={};
+  await Promise.all([...new Set(act.map(a=>a.sym))].map(async s=>{try{P[s]=+(await j(`${BN}/ticker/price?symbol=${s}USDT`,6000)).price}catch(e){const c=coins.find(x=>x.symbol.toUpperCase()===s);if(c)P[s]=c.current_price}}));
+  for(const a of act){const p=P[a.sym];if(!p)continue;a.last=p;if(a.dir==='>'?p>=a.price:p<=a.price){a.done=true;a.at=Date.now();a.hit=p;notify(a,p)}}
+  saveAl();if($('aldyn'))alDyn();
+ }finally{alBusy=false}}
+const chv=id=>[...document.querySelectorAll('.via:checked')].map(x=>x.value);
+function showAlerts(){
+ if(!coins.length){$('app').innerHTML=skPage();return}
+ const st=(k,f)=>as[k][f]||'';
+ $('app').innerHTML=`<div class="panel"><b>Новый алерт</b><div class="aform" style="margin-top:10px">
+ <select id="ac">${coins.map(c=>`<option value="${esc(c.id)}">${esc(c.symbol.toUpperCase())} —${esc(c.name)}</option>`).join('')}</select>
+ <select id="ad"><option value=">">&gt;</option><option value="<">&lt;</option></select>
+ <input id="ap" inputmode="decimal" placeholder="Цена, $">
+ <div class="chk full"><label><input type="checkbox" class="via" value="br" checked> 🔔 Браузер</label><label><input type="checkbox" class="via" value="tg"> ✈️ Telegram</label><label><input type="checkbox" class="via" value="em"> ✉️ Email</label></div>
+ <button class="btn full" id="ab">Создать</button></div><div class="hint" id="ah"></div></div>
+ <div id="aldyn"></div>
+ <div class="panel"><b>Настройки уведомлений</b>
+ <div class="help">⚠️ Алерты проверяются каждые 15 секунд, пока эта страница открыта.</div>
+ <b style="font-size:14px">✈️ Telegram</b>
+ <div class="sgrid"><input id="tgt" placeholder="Токен бота" value="${esc(st('tg','tok'))}" autocomplete="off"><input id="tgc" placeholder="Chat ID" value="${esc(st('tg','chat'))}"></div>
+ <div class="tabs" style="padding:0"><button class="btn2" id="tgf">Найти Chat ID</button><button class="btn2" id="tgx">Отправить тест</button><span class="help" id="tgm"></span></div>
+ <b style="font-size:14px;display:block;margin-top:14px">✉️ Email</b>
+ <div class="sgrid"><input id="ems" placeholder="Service ID" value="${esc(st('em','svc'))}"><input id="emt" placeholder="Template ID" value="${esc(st('em','tpl'))}"><input id="emk" placeholder="Public Key" value="${esc(st('em','key'))}" autocomplete="off"><input id="emto" type="email" placeholder="Твой email" value="${esc(st('em','to'))}"></div>
+ <div class="tabs" style="padding:0"><button class="btn2" id="emx">Отправить тест</button><span class="help" id="emm"></span></div>
+ <b style="font-size:14px;display:block;margin-top:14px">🔔 Браузер</b>
+ <div class="tabs" style="padding:0"><button class="btn2" id="brx">Разрешить уведомления</button><span class="help" id="brm">${'Notification' in window?'Статус: '+({granted:'разрешены',denied:'заблокированы',default:'не запрошены'})[Notification.permission]:'Не поддерживается'}</span></div></div>`;
+ const say=(id,ok,t)=>{$(id).className='help '+(ok?'ok':'bad');$(id).textContent=t};
+ [['tgt','tg','tok'],['tgc','tg','chat'],['ems','em','svc'],['emt','em','tpl'],['emk','em','key'],['emto','em','to']].forEach(([i,g,f])=>$(i).oninput=e=>{as[g][f]=e.target.value.trim();saveSet()});$('tgf').onclick=async()=>{try{const t=as.tg.tok;if(!t)throw new Error('сначала вставь токен');const d=await j(`https://api.telegram.org/bot${encodeURIComponent(t)}/getUpdates`);
+  const m=[...d.result].reverse().find(x=>x.message||x.channel_post);if(!m)throw new Error('напиши боту любое сообщение');
+  as.tg.chat=String((m.message||m.channel_post).chat.id);$('tgc').value=as.tg.chat;saveSet();say('tgm',1,'Chat ID найден')}catch(e){say('tgm',0,'Ошибка: '+e.message)}};
+ $('tgx').onclick=async()=>{try{await tgSend('✅ CryptoWatch: тестовое уведомление');say('tgm',1,'Отправлено')}catch(e){say('tgm',0,'Ошибка: '+e.message)}};
+ $('emx').onclick=async()=>{try{await emSend('CryptoWatch тест','✅ Тест');say('emm',1,'Отправлено')}catch(e){say('emm',0,'Ошибка: '+e.message)}};
+ $('brx').onclick=async()=>{if(!('Notification' in window))return;const r=await Notification.requestPermission();say('brm',r==='granted','Статус: разрешены')};
+ $('ap').placeholder='Цена, $ (сейчас '+fmt(coins[0].current_price)+')';
+ $('ac').onchange=()=>{const c=coins.find(x=>x.id===$('ac').value);$('ap').placeholder='Цена, $ (сейчас '+fmt(c.current_price)+')'};
+ $('ab').onclick=()=>{const c=coins.find(x=>x.id===$('ac').value),dir=$('ad').value,pr=num($('ap').value),via=chv();
+  if(!(pr>0)){$('ah').textContent='Введи цену числом больше нуля.';return}
+  if(!via.length){$('ah').textContent='Выбери канал уведомления.';return}
+  al.push({id:Date.now(),sym:c.symbol.toUpperCase(),cid:c.id,dir,price:pr,via,ts:Date.now()});saveAl();
+  $('ap').value='';$('ah').textContent='';alDyn();checkAlerts()};
+ alDyn();
+}
+function alDyn(){
+ const b=$('aldyn');if(!b)return;
+ if(!al.length){b.innerHTML='<div class="panel msg">Алертов пока нет.</div>';return}
+ const ch={br:'🔔',tg:'✈️',em:'✉️'};
+ b.innerHTML='<div class="panel"><b>Мои алерты</b>'+[...al].sort((x,y)=>(x.done?1:0)-(y.done?1:0)||y.ts-x.ts).map(a=>{
+  const c=coins.find(x=>x.id===a.cid),cur=a.last||c?.current_price,d=cur?(a.price/cur-1)*100:null;
+  return `<div class="al ${a.done?'done':''}"><div><b>${esc(a.sym)} ${a.dir==='>'?'&gt;':'&lt;'} ${fmt(a.price)}</b><small>${a.via.map(v=>ch[v]).join(' ')} · ${a.done?'сработал при '+fmt(a.hit):'сейчас '+fmt(cur)}</small></div>
+  <div class="tabs" style="padding:0">${a.done?`<button class="btn2" onclick="rearm(${a.id})">Включить снова</button>`:'<span class="ok">● активен</span>'}<button class="x2" onclick="delAl(${a.id})">✕</button></div></div>`}).join('')+'</div>';
+}
+function rearm(id){const a=al.find(x=>x.id===id);if(a){a.done=false;a.err='';delete a.at;delete a.hit;saveAl();alDyn();checkAlerts()}}
+function delAl(id){al=al.filter(x=>x.id!==id);saveAl();alDyn()}
+
+// ---------- аккаунт (FastAPI JWT бэкенд) ----------
+let amode='login';
+function navAcc(){const a=$('accl');if(a)a.textContent=acct?'👤 '+acct.name:'👤 Войти'}
+
+async function checkAuthMe(){
+ const token=localStorage.getItem('access_token');
+ if(!token)return;
+ try{
+  const r=await fetch('/api/v1/auth/me',{headers:{'Authorization':'Bearer '+token}});
+  if(r.ok){const u=await r.json();acct=u;me=u.login;navAcc()}
+  else{localStorage.removeItem('access_token');acct=null;me=null;navAcc()}
+ }catch(e){console.error(e)}
+}
+
+function endSession(){
+ localStorage.removeItem('access_token');
+ acct=null;
+ me=null;
+ location.hash='#/account';
+ location.reload();
+}
+
+function showAccount(){acct?showCabinet():showAuth()}
+
+function showAuth(){
+ const reg=amode==='reg';
+ $('app').innerHTML=`<div class="panel" style="max-width:440px;margin:0 auto"><div class="tabs"><button class="tab ${!reg?'on':''}" onclick="amode='login';showAuth()">Вход</button><button class="tab ${reg?'on':''}" onclick="amode='reg';showAuth()">Регистрация</button></div>
+ <div class="auth">
+ ${reg?'<input id="rn" placeholder="Имя" autocomplete="name" maxlength="40">':''}
+ <input id="lg" placeholder="Login" autocomplete="username" maxlength="24">
+ ${reg?'<input id="re" type="email" placeholder="Почта" autocomplete="email">':''}
+ <input id="pw" type="password" placeholder="Password" autocomplete="${reg?'new-password':'current-password'}">
+ ${reg?'<input id="pw2" type="password" placeholder="Повтори пароль" autocomplete="new-password">':''}
+ <button class="btn" id="go">${reg?'Зарегистрироваться':'Войти'}</button></div>
+ <div class="hint" id="ae"></div>
+ <div class="help">🔒 Авторизация подключена к базе данных FastAPI через JWT.</div></div>`;
+ document.querySelectorAll('.auth input').forEach(i=>i.onkeydown=e=>{if(e.key==='Enter')$('go').click()});$('go').onclick=async()=>{
+  const err=t=>{$('ae').className='hint bad';$('ae').textContent=t};$('go').disabled=true;
+  try{
+   const lg=$('lg').value.trim(),pw=$('pw').value;
+   if(!lg||!pw)return err('Заполните все поля.');
+
+   if(!reg){
+    const body=new URLSearchParams();
+    body.append('username',lg);
+    body.append('password',pw);
+    
+    const res=await fetch('/api/v1/auth/login',{
+     method:'POST',
+     headers:{'Content-Type':'application/x-www-form-urlencoded'},
+     body:body
+    });
+    if(!res.ok){
+     const jerr=await res.json().catch(()=>({}));
+     throw new Error(jerr.detail||'Неверный логин или пароль.');
+    }
+    const data=await res.json();
+    localStorage.setItem('access_token',data.access_token);
+    acct={name:data.name,login:data.login,email:data.email};
+    me=data.login;
+    location.hash='#/account';
+    location.reload();
+    return;
+   }
+
+   const nm=$('rn').value.trim(),em=$('re').value.trim(),pw2=$('pw2').value;
+   if(!nm)return err('Укажите имя.');
+   if(!em)return err('Укажите почту.');
+   if(pw.length<8)return err('Пароль должен быть не менее 8 символов.');
+   if(pw!==pw2)return err('Пароли не совпадают.');
+
+   const res=await fetch('/api/v1/auth/register',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({login:lg,name:nm,email:em,password:pw})
+   });
+   if(!res.ok){
+    const jerr=await res.json().catch(()=>({}));
+    throw new Error(jerr.detail||'Ошибка регистрации.');
+   }
+   const data=await res.json();
+   localStorage.setItem('access_token',data.access_token);
+   acct={name:data.name,login:data.login,email:data.email};
+   me=data.login;
+   location.hash='#/account';
+   location.reload();
+
+  }catch(e){err(e.message)}finally{if($('go'))$('go').disabled=false}
+ };
+}
+
+function showCabinet(){
+ const u=acct||{};
+ $('app').innerHTML=`<div class="panel"><div class="prof"><div class="avatar">${esc((u.name||'U')[0].toUpperCase())}</div><div><div class="big" style="font-size:24px">${esc(u.name||'Пользователь')}</div><div class="fsub">@${esc(u.login||'')} · ${esc(u.email||'')}</div></div><button class="btn2" id="lo" style="margin-left:auto">Выйти</button></div></div>
+ <div class="panel"><b>Управление аккаунтом</b><div class="help" style="margin-top:10px">Вы успешно авторизованы на вашем FastAPI бэкенде с использованием JWT-токенов. Данные аккаунта защищены и хранятся в вашей базе данных SQLite.</div></div>`;
+ $('lo').onclick=endSession;
+}
+
+// ---------- роутер ----------
+function route(soft){
+ const h=location.hash;
+ clearInterval(futT);if(!/^#\/coin\//.test(h))clearInterval(coinT);
+ const act=['#/portfolio','#/futures','#/alerts','#/account'].includes(h)?h:'#';
+ document.querySelectorAll('.nav a').forEach(a=>a.classList.toggle('on',a.getAttribute('href')===act));
+ if(h==='#/account'){if(soft&&($('accfav')||$('go'))){if($('accfav'))accFav();return}showAccount();return}
+ if(h==='#/alerts'){if(soft&&$('aldyn')){alDyn();return}showAlerts();return}
+ if(h==='#/futures'){if(soft&&$('fut')){futT=setInterval(loadFut,30000);return}showFutures();return}
+ if(h==='#/portfolio'){if(soft&&$('pfdyn')){pfDyn();return}showPortfolio();return}
+ const m=h.match(/^#\/coin\/(.+)$/);
+ if(m){if(soft&&$('chart')&&h.endsWith(m[1])){const c=coins.find(x=>x.id===m[1]);if(c)stats(c);return}showCoin(decodeURIComponent(m[1]))}
+ else{if(soft&&$('rows')){rows();return}showMarket()}
+}
+addEventListener('hashchange',()=>{scrollTo(0,0);route()});
+checkAuthMe();
+navAcc();route();loadCoins();connectLiq();setInterval(checkAlerts,15000);setTimeout(checkAlerts,4000);setInterval(loadCoins,90000);
+</script>
+</body>
+</html>
