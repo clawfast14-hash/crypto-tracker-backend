@@ -6,17 +6,19 @@
 [![JWT](https://img.shields.io/badge/JWT-black?style=for-the-badge&logo=JSON%20web%20tokens)](https://jwt.io/)
 [![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
 
+🌐 **Live Demo (Swagger UI)**: [https://crypto-tracker-backend-ovoj.onrender.com/docs](https://crypto-tracker-backend-ovoj.onrender.com/docs)
+
 RESTful API сервис для отслеживания курсов криптовалют, управления пользовательскими портфелями и аутентификации. Написан на **FastAPI** с асинхронной архитектурой, использованием ORM **SQLAlchemy** и авторизацией по **JWT**.
 
 ---
 
 ## 🛠 Технологический стек
 
-- **Фреймворк**: [FastAPI](https://fastapi.tiangolo.com/) (Python 3.10+)
+- **Фреймворк**: [FastAPI](https://fastapi.tiangolo.com/) (Python 3.11)
 - **База данных**: SQLite (с возможностью легкого перехода на PostgreSQL)
 - **ORM & Миграции**: SQLAlchemy & Pydantic v2
 - **Безопасность**: OAuth2 с JWT-токенами (Passlib, bcrypt)
-- **Контейнеризация**: Docker & Docker Compose
+- **Деплой & Контейнеризация**: Render.com & Docker Compose
 
 ---
 
@@ -29,9 +31,17 @@ RESTful API сервис для отслеживания курсов крипт
 
 ---
 
-## 🚀 Быстрый запуск
+## 📑 Интерактивная документация API
 
-### Вариант 1: Локальный запуск (Python)
+Вы можете протестировать работающее API в реальном времени:
+- **Live Production Docs (Swagger UI)**: [https://crypto-tracker-backend-ovoj.onrender.com/docs](https://crypto-tracker-backend-ovoj.onrender.com/docs)
+- **Live Production Docs (ReDoc)**: [https://crypto-tracker-backend-ovoj.onrender.com/redoc](https://crypto-tracker-backend-ovoj.onrender.com/redoc)
+
+---
+
+## 🚀 Быстрый запуск (Локально)
+
+### Вариант 1: Запуск через Python
 
 1. **Клонируйте репозиторий:**
    ```bash

@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from pydantic import BaseModel
@@ -30,10 +31,6 @@ class UserRegister(BaseModel):
     login: str
     name: str
     email: str
-    password: str
-
-class UserLogin(BaseModel):
-    login: str
     password: str
 
 class Token(BaseModel):
@@ -71,8 +68,9 @@ async def register(user_data: UserRegister, db: AsyncSession = Depends(get_db)):
     }
 
 @app.post("/api/v1/auth/login", response_model=Token)
-async def login(form_data: UserLogin, db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(UserDB).where(UserDB.login == form_data.login.lower()))
+async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = Depends(get_db)):
+    # OAuth2PasswordRequestForm передает логин через поле form_data.username
+    result = await db.execute(select(UserDB).where(UserDB.login == form_data.username.lower()))
     user = result.scalars().first()
     if not user or not verify_password(form_data.password, user.hashed_password):
         raise HTTPException(status_code=400, detail="Неверный логин или пароль")
