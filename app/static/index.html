@@ -412,11 +412,18 @@ const chv=id=>[...document.querySelectorAll('.via:checked')].map(x=>x.value);
 function showAlerts(){
  if(!coins.length){$('app').innerHTML=skPage();return}
  const st=(k,f)=>as[k][f]||'';
+ // Загружаем сохраненные каналы по умолчанию или берём ['br']
+ const savedVia=as.via||['br'];
+ 
  $('app').innerHTML=`<div class="panel"><b>Новый алерт</b><div class="aform" style="margin-top:10px">
  <select id="ac">${coins.map(c=>`<option value="${esc(c.id)}">${esc(c.symbol.toUpperCase())} —${esc(c.name)}</option>`).join('')}</select>
  <select id="ad"><option value=">">&gt;</option><option value="<">&lt;</option></select>
  <input id="ap" inputmode="decimal" placeholder="Цена, $">
- <div class="chk full"><label><input type="checkbox" class="via" value="br" checked> 🔔 Браузер</label><label><input type="checkbox" class="via" value="tg"> ✈️ Telegram</label><label><input type="checkbox" class="via" value="em"> ✉️ Email</label></div>
+ <div class="chk full">
+   <label><input type="checkbox" class="via" value="br" ${savedVia.includes('br')?'checked':''}> 🔔 Браузер</label>
+   <label><input type="checkbox" class="via" value="tg" ${savedVia.includes('tg')?'checked':''}> ✈️ Telegram</label>
+   <label><input type="checkbox" class="via" value="em" ${savedVia.includes('em')?'checked':''}> ✉️ Email</label>
+ </div>
  <button class="btn full" id="ab">Создать</button></div><div class="hint" id="ah"></div></div>
  <div id="aldyn"></div>
  <div class="panel"><b>Настройки уведомлений</b>
@@ -429,7 +436,17 @@ function showAlerts(){
  <div class="tabs" style="padding:0"><button class="btn2" id="emx">Отправить тест</button><span class="help" id="emm"></span></div>
  <b style="font-size:14px;display:block;margin-top:14px">🔔 Браузер</b>
  <div class="tabs" style="padding:0"><button class="btn2" id="brx">Разрешить уведомления</button><span class="help" id="brm">${'Notification' in window?'Статус: '+({granted:'разрешены',denied:'заблокированы',default:'не запрошены'})[Notification.permission]:'Не поддерживается'}</span></div></div>`;
+ 
  const say=(id,ok,t)=>{$(id).className='help '+(ok?'ok':'bad');$(id).textContent=t};
+ 
+ // Сохраняем состояние галочек при любом клике по ним
+ document.querySelectorAll('.via').forEach(chk=>{
+  chk.onchange=()=>{
+   as.via=chv();
+   saveSet();
+  };
+ });
+
  [['tgt','tg','tok'],['tgc','tg','chat'],['ems','em','svc'],['emt','em','tpl'],['emk','em','key'],['emto','em','to']].forEach(([i,g,f])=>$(i).oninput=e=>{as[g][f]=e.target.value.trim();saveSet()});$('tgf').onclick=async()=>{try{const t=as.tg.tok;if(!t)throw new Error('сначала вставь токен');const d=await j(`https://api.telegram.org/bot${encodeURIComponent(t)}/getUpdates`);
   const m=[...d.result].reverse().find(x=>x.message||x.channel_post);if(!m)throw new Error('напиши боту любое сообщение');
   as.tg.chat=String((m.message||m.channel_post).chat.id);$('tgc').value=as.tg.chat;saveSet();say('tgm',1,'Chat ID найден')}catch(e){say('tgm',0,'Ошибка: '+e.message)}};
