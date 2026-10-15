@@ -1,49 +1,45 @@
-# 🚀 Crypto Tracker Backend API
+# 🚀 CryptoWatch — Persistent Fullstack Crypto Tracker
 
-[![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com/)
-[![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
-[![SQLite](https://img.shields.io/badge/SQLite-003B57?style=for-the-badge&logo=sqlite&logoColor=white)](https://www.sqlite.org/)
-[![JWT](https://img.shields.io/badge/JWT-black?style=for-the-badge&logo=JSON%20web%20tokens)](https://jwt.io/)
-[![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
-
-🌐 **Live Demo (Swagger UI)**: [https://crypto-tracker-backend-ovoj.onrender.com/docs](https://crypto-tracker-backend-ovoj.onrender.com/docs)
-
-RESTful API сервис для отслеживания курсов криптовалют, управления пользовательскими портфелями и аутентификации. Написан на **FastAPI** с асинхронной архитектурой, использованием ORM **SQLAlchemy** и авторизацией по **JWT**.
+**CryptoWatch** — це сучасний веб-додаток для відстеження криптовалютних ринків, портфелів та налаштування персональних алертів. Проект поєднує в собі швидкий інтерактивний фронтенд та надійний асинхронний бекенд із персистентним сховищем даних.
 
 ---
 
-## 🛠 Технологический стек
+## 🛠 Технологічний стек
 
-- **Фреймворк**: [FastAPI](https://fastapi.tiangolo.com/) (Python 3.11)
-- **База данных**: SQLite (с возможностью легкого перехода на PostgreSQL)
-- **ORM & Миграции**: SQLAlchemy & Pydantic v2
-- **Безопасность**: OAuth2 с JWT-токенами (Passlib, bcrypt)
-- **Деплой & Контейнеризация**: Render.com & Docker Compose
-
----
-
-## ✨ Основной функционал
-
-- 🔑 **Аутентификация и Авторизация**: Регистрация пользователей, генерация безопасных JWT-токенов access/refresh.
-- 📈 **Мониторинг криптовалют**: Получение актуальных данных о ценах и динамике рынка.
-- 💼 **Портфель пользователя**: Управление активами, подсчет общего баланса и истории транзакций.
-- 🛡 **Защита эндпоинтов**: Безопасный доступ к приватным маршрутам с валидацией токена.
-
----
-
-## 📑 Интерактивная документация API
-
-Вы можете протестировать работающее API в реальном времени:
-- **Live Production Docs (Swagger UI)**: [https://crypto-tracker-backend-ovoj.onrender.com/docs](https://crypto-tracker-backend-ovoj.onrender.com/docs)
-- **Live Production Docs (ReDoc)**: [https://crypto-tracker-backend-ovoj.onrender.com/redoc](https://crypto-tracker-backend-ovoj.onrender.com/redoc)
+* **Бекенд (Backend):** 
+  * Python, [FastAPI](https://fastapi.tiangolo.com/) (швидкий асинхронний фреймворк)
+  * SQLAlchemy (ORM для роботи з базами даних)
+  * SQLite (персистентна база даних для користувачів, алертів та сесій)
+  * JWT (JSON Web Tokens) та хешування паролів для безпечної авторизації
+* **Фронтенд (Frontend):** 
+  * HTML5, CSS3, Vanilla JavaScript (SPA-архітектура)
+  * Fetch API для взаємодії з бекендом
+  * Інтеграція сповіщень (Telegram, Email, Браузер)
+* **Інструменти та автоматизація:** 
+  * Git / GitHub
+  * Скрипти швидкого запуску (Batch-скрипти для Windows)
+  * AI-Assisted Workflow (оптимізація та прискорення розробки за допомогою штучного інтелекту)
 
 ---
 
-## 🚀 Быстрый запуск (Локально)
+## 🌟 Основні можливості
 
-### Вариант 1: Запуск через Python
+1. **Безпечна авторизація:** Реєстрація та логін користувачів із генерацією JWT-токенів та зберіганням даних у базі даних (замість локального сховища браузера).
+2. **Ринок криптовалют в реальному часі:** Перегляд актуальних цін, графіків та треків монет.
+3. **Керування портфелем:** Додавання активів та відстеження загального балансу.
+4. **Система алертів (Сповіщень):** Налаштування цінових тригерів із підтримкою надсилання через **Telegram**, **Email** та системні сповіщення браузера. Збереження налаштувань користувача.
+5. **Зручний запуск:** Автоматизований запуск сервера та відкриття сайту в один клік.
 
-1. **Клонируйте репозиторий:**
+---
+
+## ⚙️ Локальний запуск проекту
+
+### Вимоги
+* Python 3.10+ встановлений у системі.
+
+### Інструкція з встановлення та запуску:
+
+1. Клонуйте репозиторій:
    ```bash
-   git clone [https://github.com/clawfast14-hash/crypto-tracker-backend.git](https://github.com/clawfast14-hash/crypto-tracker-backend.git)
-   cd crypto-tracker-backend
+   git clone [https://github.com/your-username/cryptowatch.git](https://github.com/your-username/cryptowatch.git)
+   cd cryptowatch
